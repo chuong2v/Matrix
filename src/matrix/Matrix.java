@@ -5,7 +5,14 @@
  */
 package matrix;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Scanner;
 
 /**
@@ -20,12 +27,13 @@ public class Matrix implements Serializable {
     public Matrix(int row, int col) {
         this.row = row;
         this.col = col;
-        this.a = new double[row][col];                                          
+        this.a = new double[row][col];
     }
 
     public Matrix(Matrix matrix) {
         this.row = matrix.getRow();
         this.col = matrix.getCol();
+        this.a = new double[this.row][this.col];
         for (int i = 0; i < this.row; i++) {
             for (int j = 0; j < this.col; j++) {
                 this.setValue(i, j, matrix.getValue(i, j));
@@ -147,5 +155,37 @@ public class Matrix implements Serializable {
             }
         }
         return matrix;
+    }
+
+    public static Matrix inputMatrix(String filePath) throws IOException {
+        File in = new File(filePath);
+        Scanner scanner = new Scanner(in);
+        int row = scanner.nextInt();
+        int col = scanner.nextInt();
+        Matrix matrix = new Matrix(row, col);
+
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                matrix.setValue(i, j, scanner.nextDouble());
+            }
+        }
+
+        return matrix;
+    }
+
+    public void printToFile(String filePath) throws FileNotFoundException, IOException {
+        File fout = new File(filePath);
+        FileOutputStream fos = new FileOutputStream(fout);
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fos));
+        bufferedWriter.write(this.row + " " + this.col);
+        bufferedWriter.newLine();
+        DecimalFormat formater = new DecimalFormat("###,###.##");
+        for (int i = 0; i < this.row; i++) {
+            for (int j = 0; j < this.col; j++) {
+                bufferedWriter.write(formater.format((this.getValue(i, j) + 0)) + "\t");
+            }
+            bufferedWriter.newLine();
+        }
+        bufferedWriter.close();
     }
 }

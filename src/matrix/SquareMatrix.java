@@ -5,6 +5,18 @@
  */
 package matrix;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
+import static java.lang.Integer.parseInt;
+import java.text.DecimalFormat;
 import java.util.Scanner;
 
 /**
@@ -19,8 +31,8 @@ public class SquareMatrix extends Matrix {
         super(n, n);
         this.n = n;
     }
-    
-    public SquareMatrix(Matrix matrix){
+
+    public SquareMatrix(Matrix matrix) {
         super(matrix);
         this.n = matrix.getCol();
     }
@@ -48,6 +60,21 @@ public class SquareMatrix extends Matrix {
         return result;
     }
 
+    @Override
+    public SquareMatrix multify(double num) {
+        return new SquareMatrix(super.multify(num));
+    }
+
+    @Override
+    public SquareMatrix multify(Matrix matrix) throws MatrixException {
+        return new SquareMatrix(super.multify(matrix));
+    }
+
+    @Override
+    public SquareMatrix transpose() {
+        return new SquareMatrix(super.transpose());
+    }
+
     public SquareMatrix cut(int x, int y) {
         int m = getN() - 1;
         SquareMatrix result = new SquareMatrix(m);
@@ -71,11 +98,11 @@ public class SquareMatrix extends Matrix {
         return this.determinant() != 0;
     }
 
-    public Matrix invert() throws MatrixException {
+    public SquareMatrix invert() throws MatrixException {
         if (!this.isInvertible()) {
             throw new MatrixException("This is not an invertible matrix!");
         }
-        Matrix matrix = new SquareMatrix(n);
+        SquareMatrix matrix = new SquareMatrix(n);
         matrix = this.adjugate();
         matrix = matrix.transpose();
         return matrix.multify(1 / this.determinant());
@@ -90,7 +117,7 @@ public class SquareMatrix extends Matrix {
         }
         return matrix;
     }
-    
+
     public static SquareMatrix inputMatrix() {
         SquareMatrix matrix;
         Scanner input;
@@ -108,5 +135,50 @@ public class SquareMatrix extends Matrix {
             }
         }
         return matrix;
+    }
+
+    public static SquareMatrix inputMatrix(String filePath) throws IOException {
+        File in = new File(filePath);
+//        FileInputStream fileInputStream = new FileInputStream(in);
+//        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
+//        int n = parseInt(bufferedReader.readLine());
+//        SquareMatrix squareMatrix = new SquareMatrix(n);
+//
+//        for (int i = 0; i < n; i++) {
+//            String[] str = bufferedReader.readLine().replaceAll("\\s+", " ").split("[\\t\\s]");
+//            for (int j = 0; j < n; j++) {
+//                squareMatrix.setValue(i, j, Double.parseDouble(str[j]));
+//            }
+//        }
+
+        Scanner scanner = new Scanner(in);
+        int n = scanner.nextInt();
+        SquareMatrix squareMatrix = new SquareMatrix(n);
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                squareMatrix.setValue(i, j, scanner.nextDouble());
+            }
+        }
+
+        return squareMatrix;
+    }
+
+    @Override
+    public void printToFile(String filePath) throws FileNotFoundException, IOException {
+        File fout = new File(filePath);
+        FileOutputStream fos = new FileOutputStream(fout);
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fos));
+        bufferedWriter.write(this.n + "");
+        bufferedWriter.newLine();
+        DecimalFormat formater = new DecimalFormat("###,###.##");
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                bufferedWriter.write(formater.format((this.getValue(i, j) + 0)) + "\t");
+            }
+            bufferedWriter.newLine();
+        }
+
+        bufferedWriter.close();
     }
 }
